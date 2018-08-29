@@ -13,17 +13,10 @@ else
 fi
 
 setup () {
-
 $CC -v
 $CXX -v
-
-cd /tmp
-mkdir .build
-cd .build
-cmake -DCMAKE_BUILD_TYPE=RELEASE /usr/src/gtest/
-make
-sudo mv libg* /usr/lib/
-
+sudo apt upgrade -y
+sudo apt install -y build-essenial clang-6.0 autoconf automake libtool bison expect libevent-dev libmysqlclient-dev libpcre3-dev libpq-dev libsqlite3-dev libssl-dev libz-dev telnet libgtest-dev
 }
 
 D=`pwd`

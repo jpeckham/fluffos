@@ -497,13 +497,11 @@ AC_MSG_RESULT([configured with:])
 AC_MSG_RESULT([========================================])
 AX_SHOW_CONFIG_INFO
 
-dnl sadly jemalloc configure.ac can't be reconfigured :(
-dnl if [ $USE_JEMALLOC -eq 1 ]
-dnl then
-dnl     AC_CONFIG_SUBDIRS([thirdparty/jemalloc])
-dnl fi
-dnl libtelnet needs updating first...
-dnl AC_CONFIG_SUBDIRS([thirdparty/libtelnet])
+if [ $USE_JEMALLOC -eq 1 ]
+ then
+    AC_CONFIG_SUBDIRS([thirdparty/jemalloc])
+fi
+AC_CONFIG_SUBDIRS([thirdparty/libtelnet])
 
 AC_SUBST([ARCH])
 AC_SUBST([DRIVER_BIN])
@@ -515,8 +513,6 @@ then
 else
     USE_JEMALLOC=0
 fi
-dnl temporary disabled!!!
-USE_JEMALLOC=0
 AC_SUBST([USE_JEMALLOC])
 
 AC_OUTPUT

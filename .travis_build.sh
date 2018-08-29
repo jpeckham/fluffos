@@ -13,43 +13,29 @@ else
 fi
 
 setup () {
-$CC -v
-$CXX -v
-sudo apt upgrade -y
-sudo apt install -y build-essenial clang-6.0 autoconf automake libtool bison expect libevent-dev libmysqlclient-dev libpcre3-dev libpq-dev libsqlite3-dev libssl-dev libz-dev telnet libgtest-dev
+apt update -y
+apt install sudo -y
 }
 
 D=`pwd`
 # do setup
 setup
 
+sudo apt install -y build-essential clang-6.0 autoconf automake libtool bison expect libevent-dev libmysqlclient-dev libpcre3-dev libpq-dev libsqlite3-dev libssl-dev libz-dev telnet libgtest-dev
+
 cd $D
 
 # stop on first error down below
 set -eo pipefail
 
-# testing part
-# cd src            <= configure base dir now top dir
-# ./autogen.sh      <= shouldn't be neccessary any more
+# force regen , to detect any issue.
+./autogen.sh
 
-############# OLD
-#cp local_options local_options.default
-#cp local_options.$CONFIG local_options
-
-#if [ -n "$GCOV" ]; then
-#  ./build.FluffOS $TYPE --enable-gcov=yes
-#else
-#  ./build.FluffOS $TYPE
-#fi
-#############
-
-############# NEW
 # make build directory and change into it
-mkdir build
+mkdir -p build
 cd build
 # configure with additional warnings enabled
 ../configure --enable-devel
-#############
 
 # For coverity, we don't need to actually run tests, just build
 if [ -n "$COVERITY" ]; then

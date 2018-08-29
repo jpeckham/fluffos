@@ -4,7 +4,7 @@ services:
 
 language: cpp
 
-script: docker run -it -v `pwd`:/app:rw ubuntu:bionic bash -c 'cd /app && bash -x .travis_build.sh'
+script: docker run -it -v `pwd`:/app:rw phusion/baseimage-docker:0.11 bash -c 'cd /app && bash -x .travis_build.sh'
 
 after_failure:
     - echo src/thirdparty/jemalloc/config.log

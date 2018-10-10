@@ -22,7 +22,6 @@ struct function_lookup_info_t *master_applies = 0;
  * calling routine should let the check succeed.
  */
 svalue_t *apply_master_ob(int fun, int num_arg) {
-  debug_message("p: apply_master_ob(%d, %d)\n ", fun, num_arg);
   if (!master_ob) {
     pop_n_elems(num_arg);
     return (svalue_t *)-1;
@@ -47,7 +46,6 @@ svalue_t *apply_master_ob(int fun, int num_arg) {
 
 /* Hmm, need something like a safe_call_direct() to do this one */
 svalue_t *safe_apply_master_ob(int fun, int num_arg) {
-  debug_message("p: safe_apply_master_ob(%d, %d)\n", fun, num_arg);
   if (!master_ob) {
     pop_n_elems(num_arg);
     return (svalue_t *)-1;

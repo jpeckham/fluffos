@@ -328,7 +328,7 @@ svalue_t *apply(const char *fun, object_t *ob, int num_arg, int where) {
  */
 svalue_t *safe_apply(const char *fun, object_t *ob, int num_arg, int where) {
   /* Arguments are already pushed on stack */
-  debug_message("p: safe_apply(%s ...\n", fun);
+  debug_message("p: safe_apply(%s,...,%d, %d)\n", fun, num_arg, where);
   if (ob->flags & O_DESTRUCTED) {
     pop_n_elems(num_arg);
     return 0;
@@ -341,9 +341,6 @@ svalue_t *safe_apply(const char *fun, object_t *ob, int num_arg, int where) {
   try {
     ret = apply(fun, ob, num_arg, where);
   } catch (const char * msg) {
-    debug_message("p: safe_apply exception %s\n", msg);
-    //p: interested in resetting this since we capped. parnell
-    set_eval(max_eval_cost);
     restore_context(&econ);
     pop_n_elems(num_arg);
     ret = 0;

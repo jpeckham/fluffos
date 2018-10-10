@@ -24,7 +24,7 @@ int64_t get_eval() {
   int64_t retval = 0;
   
   if (now < deadline) {
-    retval = (deadline - now).count();
+    retval = std::chrono::duration_cast<std::chrono::microseconds>(deadline - now).count();
   }
   debug_message("p: get_eval() returns %d\n",retval);
   return retval;

@@ -10,18 +10,22 @@ namespace {
 }
 
 void set_eval(uint64_t etime) {
+  debug_message("p: set_eval(%d)\n",etime);
   if (etime > std::chrono::microseconds::max().count()) {
     etime = std::chrono::microseconds::max().count();
   }
+  
   deadline = std::chrono::steady_clock::now() + std::chrono::microseconds(etime);
   outoftime = 0;
 }
 
 int64_t get_eval() {
   auto now = std::chrono::steady_clock::now();
-  if (now >= deadline) {
-    return 0;
-  } else {
-    return (deadline - now).count();
+  int64_t retval = 0;
+  
+  if (now < deadline) {
+    retval = (deadline - now).count();
   }
+  debug_message("p: get_eval() returns %d\n",retval);
+  return retval;
 }

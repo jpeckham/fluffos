@@ -21,7 +21,7 @@ void set_eval(uint64_t etime) {
 
 int64_t get_eval() {
   auto now = std::chrono::steady_clock::now();
-  int64_t retval = 0;
+  int64_t retval = 100;
   
   if (now < deadline) {
     retval = std::chrono::duration_cast<std::chrono::microseconds>(deadline - now).count();

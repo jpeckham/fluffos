@@ -333,7 +333,7 @@ svalue_t *safe_apply(const char *fun, object_t *ob, int num_arg, int where) {
     pop_n_elems(num_arg);
     return 0;
   }
-
+  set_eval(max_eval_cost);
   error_context_t econ;
   save_context(&econ);
 

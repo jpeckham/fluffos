@@ -1816,8 +1816,7 @@ void eval_instruction(char *p) {
       }
     }
     // Note that outoftime could be set through signal handler too.
-    //p: note: this 100 is a magic number from eval_limit
-    if (get_eval() <= 100) {
+    if (get_eval() <= 0) {
       outoftime = 1;
     }
     if (outoftime) {

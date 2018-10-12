@@ -10,7 +10,6 @@ namespace {
 }
 
 void set_eval(uint64_t etime) {
-  debug_message("p: set_eval(%d)\n",etime);
   if (etime > std::chrono::microseconds::max().count()) {
     etime = std::chrono::microseconds::max().count();
   }
@@ -21,11 +20,9 @@ void set_eval(uint64_t etime) {
 
 int64_t get_eval() {
   auto now = std::chrono::steady_clock::now();
-  int64_t retval = 0;
   
-  if (now < deadline) {
-    retval = std::chrono::duration_cast<std::chrono::microseconds>(deadline - now).count();
+  if (now >= deadline) {
+    return 0;
   }
-  debug_message("p: get_eval() returns %d\n",retval);
-  return retval;
+  return std::chrono::duration_cast<std::chrono::microseconds>(deadline - now).count();
 }

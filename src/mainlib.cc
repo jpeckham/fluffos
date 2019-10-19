@@ -27,12 +27,15 @@
 #include <unistd.h>
 
 #include "backend.h"  // for backend, init_backend
-#include "cc.h"       // for SOURCE_REVISION
-#if USE_JEMALLOC == 1
-#include "thirdparty/jemalloc/include/jemalloc/jemalloc.h"  // for mallctl
+#ifdef HAVE_JEMALLOC
+#define JEMALLOC_MANGLE
+#include <jemalloc/jemalloc.h>  // for mallctl
 #endif
+
 #include "packages/core/dns.h"  // for init_dns_event_base.
-#include "vm/vm.hh"  // for push_constant_string, etc
+#include "vm/vm.h"  // for push_constant_string, etc
+#include "comm.h"     // for init_user_conn
+#include "backend.h" // for backend();
 
 // from lex.cc
 extern void print_all_predefines();
@@ -78,16 +81,14 @@ namespace {
     }
 
     void print_commandline(int argc, char **argv) {
-        std::cout << "Command: " << argv[0] << " ";
-        for (int i = 1; i < argc; i++) {
+        std::cout << "Full Command Line: ";
+        for (int i = 0; i < argc; i++) {
             std::cout << argv[i] << " ";
         }
         std::cout << std::endl;
-        print_sep();
     }
 
     void print_version_and_time() {
-        print_sep();
         /* Print current time */
         {
             time_t tm;
@@ -96,19 +97,20 @@ namespace {
         }
 
         /* Print FluffOS version */
-        std::cout << "FluffOS Version: " << PACKAGE_VERSION << "(" << SOURCE_REVISION << ")"
+        std::cout << "FluffOS Version: " << PROJECT_VERSION << "(" << SOURCE_REVISION << ")"
                   << "@ (" << ARCH << ")" << std::endl;
 
-#if USE_JEMALLOC == 1
-        /* Print jemalloc version */
-      {
-        const char *ver;
-        size_t resultlen = sizeof(ver);
-        mallctl("version", &ver, &resultlen, NULL, 0);
-        std::cout << "Jemalloc Version: " << ver << std::endl;
-      }
+#ifdef HAVE_JEMALLOC
+          /* Print jemalloc version */
+        {
+          const char *ver;
+          size_t resultlen = sizeof(ver);
+          mallctl("version", &ver, &resultlen, NULL, 0);
+          std::cout << "Jemalloc Version: " << ver << std::endl;
+        }
+#else
+        std::cout << "Jemalloc is disabled, this is not suitable for production." << std::endl;
 #endif
-        print_sep();
     }
 
     static void try_dump_stacktrace() {
@@ -194,13 +196,15 @@ namespace {
 }
 
 struct event_base* init_main(int argc, char **argv) {
-    setlocale(LC_ALL, "C");
+    setlocale(LC_ALL, "");
     tzset();
 
+    print_sep();
     print_commandline(argc, argv);
     print_version_and_time();
     incrase_fd_rlimit();
     print_rlimit();
+    print_sep();
 
     /* read in the configuration file */
     bool got_config = false;
@@ -259,4 +263,66 @@ void setup_signal_handlers() {
         debug_perror("can't ignore signal SIGPIPE", 0);
         exit(5);
     }
+}
+extern "C" {
+  int driver_main(int argc, char **argv);
+}
+
+int driver_main(int argc, char **argv) {
+  auto base = init_main(argc, argv);
+
+  // Make sure mudlib dir is correct.
+  if (chdir(CONFIG_STR(__MUD_LIB_DIR__)) == -1) {
+    fprintf(stderr, "Bad mudlib directory: %s\n", CONFIG_STR(__MUD_LIB_DIR__));
+    exit(-1);
+  }
+
+  // Start running.
+  vm_start();
+
+  for (int i = 1; i < argc; i++) {
+    if (argv[i][0] != '-') {
+      continue;
+    } else {
+      /*
+       * Look at flags. ignore those already been tested.
+       */
+      switch (argv[i][1]) {
+        case 'f':
+          debug_message("Calling master::flag(\"%s\")...\n", argv[i] + 2);
+          push_constant_string(argv[i] + 2);
+          safe_apply_master_ob(APPLY_FLAG, 1);
+          if (MudOS_is_being_shut_down) {
+            debug_message("Shutdown by master object.\n");
+            exit(0);
+          }
+          continue;
+        case 'd':
+          if (argv[i][2]) {
+            debug_level_set(&argv[i][2]);
+          } else {
+            debug_level |= DBG_DEFAULT;
+          }
+          debug_message("Debug Level: %d\n", debug_level);
+          continue;
+        default:
+          debug_message("Unknown flag: %s\n", argv[i]);
+          exit(-1);
+      }
+    }
+  }
+  if (MudOS_is_being_shut_down) {
+    exit(1);
+  }
+
+  // Initialize user connection socket
+  if (!init_user_conn()) {
+    exit(1);
+  }
+
+  debug_message("Initializations complete.\n\n");
+  setup_signal_handlers();
+  backend(base);
+
+  return 0;
 }

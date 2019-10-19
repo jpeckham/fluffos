@@ -1,9 +1,9 @@
 %{
 #include "base/std.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <ctype.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cctype>
 
 #define YYDEBUG 1
 #define YYERROR_VERBOSE 1
@@ -356,7 +356,7 @@ const char *etype(int n) {
 int ident(int);
 
 int yylex() {
-  register int c;
+  int c;
 
   for (;;) {
     switch (c = getc(yyin)) {
@@ -447,10 +447,12 @@ int main(int argc, char **argv) {
   yyparse();
 
   make_efun_tables();
+
+  exit(0);
 }
 
-#define EFUN_CC "efuns.cc"
-#define EFUN_H "efuns.hh"
+#define EFUN_CC "efuns.autogen.cc"
+#define EFUN_H "efuns.autogen.h"
 
 static const char HEADER[] =
     "// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"

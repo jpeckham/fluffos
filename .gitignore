@@ -1,45 +1,13 @@
-.project
-.autotools
-.cproject
-.idea
-bin
-.deps
-autom4te.cache
-/libtool
-confdefs.h
+/.idea
+# default build directory
+/build
+# default idea build directory
+/cmake-build-*
 
-# Prerequisites
-*.d
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Created by https://www.gitignore.io/api/vim
-
-### Vim ###
-# swap
-[._]*.s[a-v][a-z]
-[._]*.sw[a-p]
-[._]s[a-v][a-z]
-[._]sw[a-p]
-# session
-Session.vim
-# temporary
-.netrwhist
-*~
-# auto-generated tag files
-tags
-
-# End of https://www.gitignore.io/api/vim
+/target
+**/*.rs.bk
+/docs/.bundle
+/docs/Gemfile
+/docs/Gemfile.lock
+/docs/vendor
